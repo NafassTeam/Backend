@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_swagger',
-    'Authentication.apps.AuthenticationConfig',
     'drf_yasg',
+    'authApp',
 ]
 
 MIDDLEWARE = [
@@ -56,7 +56,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'app.urls'
 
-AUTH_USER_MODEL = 'Authentication.User'
+AUTH_USER_MODEL = 'authApp.User'
 
 TEMPLATES = [
     {

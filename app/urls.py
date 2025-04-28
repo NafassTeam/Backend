@@ -44,6 +44,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('auth/',  include('Authentication.urls')),  # Include the auth app URLs
+    path('auth/',  include('authApp.urls')),  # Include the auth app URLs
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # Serve media files in development

@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User, Therapist, Patient
 import re
 
@@ -6,7 +8,7 @@ import re
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id','email', 'username', 'password', 'profile_picture', 'first_name', 'last_name', 'phone_number','birth_date','gender']
+        fields =['id','email', 'username', 'password', 'first_name', 'last_name','phone_number','birth_date','gender']
         extra_kwargs = {'password': {'write_only': True}}
         read_only_fields = ['id']
 
@@ -30,25 +32,28 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class TherapistCreateSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, required=True, min_length=8)
+    address = serializers.CharField(required=True)
+    province = serializers.CharField(required=True)
+    city = serializers.CharField(required=True)
+    professional_title = serializers.CharField(required=True)
+    degree = serializers.CharField(required=True)
+    university = serializers.CharField(required=True)
+    experience_years = serializers.IntegerField(required=True)
+    languages_spoken = serializers.CharField(required=True)
+    specialization = serializers.CharField(required=True)
+    autorization_number = serializers.CharField(required=True)
+    documents = serializers.FileField(required=True)
     profile_picture = serializers.ImageField(required=False)
-    documents = serializers.FileField(required=False)
 
     class Meta:
         model = User
         fields = [
             'username', 'email', 'password', 'first_name', 'last_name', 'phone_number', 'birth_date', 'gender',
-            'profile_picture', 'address', 'province', 'city', 'professional_title', 'degree', 'university',
-            'experience_years', 'languages_spoken', 'specialization', 'autorization_number', 'documents'
+        'address', 'province', 'city', 'professional_title', 'degree', 'university',
+            'experience_years', 'languages_spoken', 'specialization', 'autorization_number', 'documents','profile_picture'
         ]
-        extra_kwargs = {
-            'email': {'required': True},
-            'first_name': {'required': True},
-            'last_name': {'required': True},
-            'gender': {'required': True},
-            'specialization': {'required': True},
-            'autorization_number': {'required': True},
-        }
+        
     def create(self, validated_data):
         therapist_data = {
             'address': validated_data.pop('address', None),
@@ -73,6 +78,7 @@ class TherapistCreateSerializer(serializers.ModelSerializer):
             birth_date=validated_data.get('birth_date'),
             gender=validated_data['gender'],
             profile_picture=validated_data.get('profile_picture'),
+            role='therapist'  # Explicitly setting role
         )
         Therapist.objects.create(user=user, **therapist_data)
         return user
@@ -85,12 +91,7 @@ class PatientCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'password', 'first_name', 'last_name', 'phone_number', 'birth_date', 'gender', 'profile_picture']
-        extra_kwargs = {
-            'email': {'required': True},
-            'first_name': {'required': True},
-            'last_name': {'required': True},
-            'gender': {'required': True},
-        }
+        
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -103,7 +104,48 @@ class PatientCreateSerializer(serializers.ModelSerializer):
             birth_date=validated_data.get('birth_date'),
             gender=validated_data['gender'],
             profile_picture=validated_data.get('profile_picture'),
+            role='patient'  # Explicitly setting role
         )
         Patient.objects.create(user=user)
         return user
-    
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(write_only=True,required=True)
+
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+
+        if email and password:
+            user = authenticate(request=self.context.get('request'), email=email, password=password)
+            if user:
+                data['user'] = user
+            else:
+                raise serializers.ValidationError("Invalid email or password.")
+        else:
+            raise serializers.ValidationError("Email and password are required.")
+        return data
+
+
+class TherapistSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source='user.email')
+    role = serializers.CharField(source='user.role')
+    first_name = serializers.CharField(source='user.first_name')
+    last_name = serializers.CharField(source='user.last_name')
+    class Meta:
+        model = Therapist
+        fields = ['id', 'email','role','first_name','last_name','address', 'province', 'city', 'professional_title', 'degree', 'university',
+                'experience_years', 'languages_spoken','specialization','autorization_number','documents']
+        read_only_fields = ['id']
+        
+class PatientSerializer(serializers.ModelSerializer): 
+    email = serializers.EmailField(source='user.email')
+    first_name = serializers.CharField(source='user.first_name')
+    last_name = serializers.CharField(source='user.last_name') 
+    role = serializers.CharField(source='user.role')
+    class Meta:
+        model = Patient
+        fields = ['id', 'email','role','first_name','last_name']
+        read_only_fields = ['id']
