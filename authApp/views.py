@@ -11,9 +11,10 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from .permissions import IsAdmin, IsAdminOrSelfPatient, IsAdminOrSelfTherapist
 from rest_framework.decorators import action
-
-
-
+from django.core.mail import send_mail
+from django.conf import settings
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
@@ -93,7 +94,11 @@ class PatientCreateView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        user = serializer.save()
+        
+        # Send verification email
+        send_verification_email(user)
+        
         return Response({
             'message': 'Patient registered successfully. Please log in.',
             'login_url': 'auth/api/login/'
@@ -106,10 +111,19 @@ class TherapistCreateView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        user = serializer.save()
+        
+        # Send verification email
+        try:
+            send_verification_email(user)
+        except Exception as e:
+            print(f"Email send error: {e}")  # or use logging
+        
         return Response({
             'message': 'Therapist registered successfully. Please log in.'
         }, status=status.HTTP_201_CREATED)
+
+
 
 class LoginView(APIView):
     
@@ -117,6 +131,14 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
+            
+            # Check if email is verified
+            if not user.is_verified:
+                return Response(
+                    {"detail": "Email not verified. Please check your inbox."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
             refresh = RefreshToken.for_user(user)
             role = user.role if user.role else 'unknown'
             return Response({
@@ -127,19 +149,31 @@ class LoginView(APIView):
                 'refresh': str(refresh),
                 'access': str(refresh.access_token)
             }, status=status.HTTP_200_OK)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+def send_verification_email(user):
+    
+    token = user.email_verification_token
+    verification_url = f"{settings.FRONTEND_URL}/verify-email/{token}/"
+    print("Token:", user.email_verification_token)  # debug
+    print("Email:", user.email)  # debug
+
+    send_mail(
+        subject="Verify Your Email",
+        message=f"Please verify your email by clicking the following link: {verification_url}",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
 
 
-
-
-
-
-
-
-
-
+def verify_email(request, token):
+    user = get_object_or_404(User, email_verification_token=token)
+    user.is_verified = True
+    user.save()
+    return HttpResponse("Email successfully verified!")
 
 
 

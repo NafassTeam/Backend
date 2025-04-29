@@ -33,16 +33,16 @@ class UserSerializer(serializers.ModelSerializer):
 
 class TherapistCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8)
-    address = serializers.CharField(required=True)
-    province = serializers.CharField(required=True)
-    city = serializers.CharField(required=True)
-    professional_title = serializers.CharField(required=True)
-    degree = serializers.CharField(required=True)
-    university = serializers.CharField(required=True)
+    address = serializers.CharField(required=False)
+    province = serializers.CharField(required=False)
+    city = serializers.CharField(required=False)
+    professional_title = serializers.CharField(required=False)
+    degree = serializers.CharField(required=False)
+    university = serializers.CharField(required=False)
     experience_years = serializers.IntegerField(required=True)
-    languages_spoken = serializers.CharField(required=True)
-    specialization = serializers.CharField(required=True)
-    autorization_number = serializers.CharField(required=True)
+    languages_spoken = serializers.CharField(required=False )
+    specialization = serializers.CharField(required=False)
+    autorization_number = serializers.CharField(required=False)
     documents = serializers.FileField(required=False)
     profile_picture = serializers.ImageField(required=False)
 
@@ -64,8 +64,8 @@ class TherapistCreateSerializer(serializers.ModelSerializer):
             'university': validated_data.pop('university', None),
             'experience_years': validated_data.pop('experience_years', None),
             'languages_spoken': validated_data.pop('languages_spoken', None),
-            'specialization': validated_data.pop('specialization'),
-            'autorization_number': validated_data.pop('autorization_number'),
+            'specialization': validated_data.pop('specialization', None),
+            'autorization_number': validated_data.pop('autorization_number', None),
             'documents': validated_data.pop('documents', None),
         }
         user = User.objects.create_user(

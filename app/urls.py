@@ -17,6 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include, re_path
+from authApp.views import verify_email
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,  # For login
     TokenRefreshView,     # For refreshing access token
@@ -46,4 +47,5 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/',  include('authApp.urls')),  # Include the auth app URLs
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('verify-email/<uuid:token>/', verify_email, name='verify_email'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # Serve media files in development

@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .views import UserViewSet, PatientCreateView, TherapistCreateView, PatientViewSet, TherapistViewSet, LoginView
+from .views import UserViewSet, PatientCreateView, TherapistCreateView, PatientViewSet, TherapistViewSet, LoginView, verify_email
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 router = DefaultRouter()
@@ -29,4 +29,6 @@ urlpatterns = [
     path('register/therapist/', TherapistCreateView.as_view(), name='therapist_register'),
     path('login/', LoginView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('verify-email/<uuid:token>/', verify_email, name='verify_email'),
+
 ]

@@ -143,3 +143,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+DEFAULT_FROM_EMAIL = 'selloummoncif.5@gmail.com'
+FRONTEND_URL = 'http://localhost:8000'  # i use this url temporaryily, i will change it later to the real one
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'selloummoncif.5@gmail.com'
+EMAIL_HOST_PASSWORD = 'bkqt kryg egdn esxl'
+EMAIL_USE_TLS = True
+
+
+# bkqt kryg egdn esxl

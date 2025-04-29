@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
-
+import uuid
 class User(AbstractUser):
 
     GENDER_CHOICES=[
@@ -37,7 +37,7 @@ class User(AbstractUser):
     birth_date = models.DateField(null=True, blank=True)  # Therapist's birth date
     gender=models.CharField(max_length=1,choices=GENDER_CHOICES)
     is_verified = models.BooleanField(default=False)  # Verification status
-
+    email_verification_token = models.UUIDField(default=uuid.uuid4, null=True, blank=True)
     
 
     def __str__(self):
@@ -59,16 +59,16 @@ class Therapist(models.Model):
     #recontruct the address attribute to be made of many other attributes like province, city, etc.
     
     user = models.OneToOneField(User, on_delete=models.CASCADE,related_name="therapists")  # One-to-one relationship with User
-    address= models.CharField(max_length=255, blank=True)  # Therapist's address
-    province= models.CharField(max_length=255, blank=True)  # Therapist's province
-    city= models.CharField(max_length=255, blank=True)  # Therapist's city
-    professional_title= models.CharField(max_length=255, blank=True)  # Therapist's professional title
-    degree= models.CharField(max_length=255, blank=True)  # Therapist's degree
-    university= models.CharField(max_length=255, blank=True)  # Therapist's university
-    experience_years= models.PositiveIntegerField()  # Therapist's years of experience
-    languages_spoken= models.CharField(max_length=255, blank=True)  # Languages spoken by the therapist
-    specialization= models.CharField(max_length=255, blank=True)  # Therapist's specialties
-    autorization_number= models.CharField(max_length=255, blank=True)  # Therapist's authorization number
+    address = models.CharField(max_length=255, blank=True, null=True)  # Therapist's address
+    province = models.CharField(max_length=255, blank=True, null=True)  # Therapist's province
+    city = models.CharField(max_length=255, blank=True, null=True)  # Therapist's city
+    professional_title = models.CharField(max_length=255, blank=True, null=True)  # Therapist's professional title
+    degree = models.CharField(max_length=255, blank=True, null=True)  # Therapist's degree
+    university = models.CharField(max_length=255, blank=True, null=True)  # Therapist's university
+    experience_years = models.PositiveIntegerField()  # Therapist's years of experience
+    languages_spoken = models.CharField(max_length=255, blank=True, null=True)  # Languages spoken by the therapist
+    specialization = models.CharField(max_length=255, blank=True, null=True)  # Therapist's specialties
+    autorization_number = models.CharField(max_length=255, blank=True, null=True)  # Therapist's authorization number
     documents = models.FileField(
         upload_to='therapist_docs/',
         blank=True,
