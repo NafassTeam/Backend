@@ -43,7 +43,7 @@ class TherapistCreateSerializer(serializers.ModelSerializer):
     languages_spoken = serializers.CharField(required=True)
     specialization = serializers.CharField(required=True)
     autorization_number = serializers.CharField(required=True)
-    documents = serializers.FileField(required=True)
+    documents = serializers.FileField(required=False)
     profile_picture = serializers.ImageField(required=False)
 
     class Meta:
@@ -137,15 +137,51 @@ class TherapistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Therapist
         fields = ['id', 'email','role','first_name','last_name','address', 'province', 'city', 'professional_title', 'degree', 'university',
-                'experience_years', 'languages_spoken','specialization','autorization_number','documents']
+                'experience_years', 'languages_spoken','specialization','autorization_number']
         read_only_fields = ['id']
         
-class PatientSerializer(serializers.ModelSerializer): 
+    def update(self, instance, validated_data):
+        # Separate out nested user data
+        user_data = validated_data.pop('user', {})
+
+        # Update Patient model fields dynamically
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Update related User model fields dynamically
+        user = instance.user
+        for attr, value in user_data.items():
+            setattr(user, attr, value)
+        user.save()
+
+        return instance
+
+        
+class PatientSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email')
     first_name = serializers.CharField(source='user.first_name')
-    last_name = serializers.CharField(source='user.last_name') 
+    last_name = serializers.CharField(source='user.last_name')
     role = serializers.CharField(source='user.role')
+
     class Meta:
         model = Patient
-        fields = ['id', 'email','role','first_name','last_name']
+        fields = ['id', 'email', 'role', 'first_name', 'last_name']
         read_only_fields = ['id']
+
+    def update(self, instance, validated_data):
+        # Separate out nested user data
+        user_data = validated_data.pop('user', {})
+
+        # Update Patient model fields dynamically
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Update related User model fields dynamically
+        user = instance.user
+        for attr, value in user_data.items():
+            setattr(user, attr, value)
+        user.save()
+
+        return instance

@@ -10,6 +10,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from .permissions import IsAdmin, IsAdminOrSelfPatient, IsAdminOrSelfTherapist
+from rest_framework.decorators import action
+
+
 
 
 class UserViewSet(ModelViewSet):
@@ -20,30 +23,68 @@ class UserViewSet(ModelViewSet):
 
 
 class PatientViewSet(ModelViewSet):
-    #will be overriden by the get_queryset method anyway:
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
     permission_classes = [IsAdminOrSelfPatient]
 
     def get_queryset(self):
-        # If the user is a patient, return only their own data
-        if self.request.user.role == 'patient':
-            return Patient.objects.filter(user=self.request.user)
-        # Admins/staff can access all patient data
-        return Patient.objects.all()
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return Patient.objects.all()
+        return Patient.objects.filter(user=user)
+
+    @action(detail=False, methods=['get', 'put', 'patch', 'delete'], url_path='me')
+    def me(self, request):
+        try:
+            patient = Patient.objects.get(user=request.user)
+        except Patient.DoesNotExist:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.method == 'GET':
+            serializer = self.get_serializer(patient)
+            return Response(serializer.data)
+
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = self.get_serializer(patient, data=request.data, partial=(request.method == 'PATCH'))
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        elif request.method == 'DELETE':
+            patient.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 class TherapistViewSet(ModelViewSet):   
-    #will be overriden by the get_queryset method anyway:
     queryset = Therapist.objects.all()
     serializer_class = TherapistSerializer
     permission_classes = [IsAdminOrSelfTherapist]
 
     def get_queryset(self):
-        # If the user is a THERAPIST, return only their own data
-        if self.request.user.role == 'therapist':
-            return Therapist.objects.filter(user=self.request.user)
-        # Admins/staff can access all patient data
-        return Patient.objects.all()
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return Therapist.objects.all()
+        return Therapist.objects.filter(user=user)
+
+    @action(detail=False, methods=['get', 'put', 'patch', 'delete'], url_path='me')
+    def me(self, request):
+        try:
+            therapist = Therapist.objects.get(user=request.user)
+        except Therapist.DoesNotExist:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.method == 'GET':
+            serializer = self.get_serializer(therapist)
+            return Response(serializer.data)
+
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = self.get_serializer(therapist, data=request.data, partial=(request.method == 'PATCH'))
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        elif request.method == 'DELETE':
+            therapist.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
     
 class PatientCreateView(generics.CreateAPIView):
     serializer_class = PatientCreateSerializer

@@ -71,6 +71,8 @@ class Therapist(models.Model):
     autorization_number= models.CharField(max_length=255)  # Therapist's authorization number
     documents = models.FileField(
         upload_to='therapist_docs/',
+        blank=True,
+        null=True
     )
     
     def __str__(self):
