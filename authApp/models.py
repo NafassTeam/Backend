@@ -36,7 +36,7 @@ class User(AbstractUser):
     
     birth_date = models.DateField(null=True, blank=True)  # Therapist's birth date
     gender=models.CharField(max_length=1,choices=GENDER_CHOICES)
-
+    is_verified = models.BooleanField(default=False)  # Verification status
 
     
 
@@ -59,21 +59,22 @@ class Therapist(models.Model):
     #recontruct the address attribute to be made of many other attributes like province, city, etc.
     
     user = models.OneToOneField(User, on_delete=models.CASCADE,related_name="therapists")  # One-to-one relationship with User
-    address= models.CharField(max_length=255)  # Therapist's address
-    province= models.CharField(max_length=255)  # Therapist's province
-    city= models.CharField(max_length=255)  # Therapist's city
-    professional_title= models.CharField(max_length=255)  # Therapist's professional title
-    degree= models.CharField(max_length=255)  # Therapist's degree
-    university= models.CharField(max_length=255)  # Therapist's university
+    address= models.CharField(max_length=255, blank=True)  # Therapist's address
+    province= models.CharField(max_length=255, blank=True)  # Therapist's province
+    city= models.CharField(max_length=255, blank=True)  # Therapist's city
+    professional_title= models.CharField(max_length=255, blank=True)  # Therapist's professional title
+    degree= models.CharField(max_length=255, blank=True)  # Therapist's degree
+    university= models.CharField(max_length=255, blank=True)  # Therapist's university
     experience_years= models.PositiveIntegerField()  # Therapist's years of experience
-    languages_spoken= models.CharField(max_length=255)  # Languages spoken by the therapist
-    specialization= models.CharField(max_length=255)  # Therapist's specialties
-    autorization_number= models.CharField(max_length=255)  # Therapist's authorization number
+    languages_spoken= models.CharField(max_length=255, blank=True)  # Languages spoken by the therapist
+    specialization= models.CharField(max_length=255, blank=True)  # Therapist's specialties
+    autorization_number= models.CharField(max_length=255, blank=True)  # Therapist's authorization number
     documents = models.FileField(
         upload_to='therapist_docs/',
         blank=True,
         null=True
     )
+    cost = models.DecimalField(max_digits=14, decimal_places=2, default=0)  # Cost of therapy sessions
     
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} (Therapist)"
