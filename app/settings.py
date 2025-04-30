@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -154,4 +155,13 @@ EMAIL_HOST_PASSWORD = 'bkqt kryg egdn esxl'
 EMAIL_USE_TLS = True
 
 
-# bkqt kryg egdn esxl
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30000),  # Increase access token lifetime to 1 year
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=60000),  # Increase refresh token lifetime  
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
