@@ -79,3 +79,12 @@ class Therapist(models.Model):
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} (Therapist)"
     
+# this is the model that will be used to store the matches between patients and therapists
+class Match(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='matches')
+    therapist = models.ForeignKey(Therapist, on_delete=models.CASCADE, related_name='matches')
+    match_score = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.patient.user.username} ↔ {self.therapist.user.username} ({self.match_score})"

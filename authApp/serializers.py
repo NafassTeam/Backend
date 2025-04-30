@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User, Therapist, Patient
+from .models import User, Therapist, Patient, Match
 import re
 
 
@@ -185,3 +185,22 @@ class PatientSerializer(serializers.ModelSerializer):
         user.save()
 
         return instance
+
+class MatchSerializer(serializers.ModelSerializer):
+    patient_email = serializers.EmailField(source='patient.user.email', read_only=True)
+    therapist_email = serializers.EmailField(source='therapist.user.email', read_only=True)
+    patient_id = serializers.PrimaryKeyRelatedField(queryset=Patient.objects.all(), source='patient')
+    therapist_id = serializers.PrimaryKeyRelatedField(queryset=Therapist.objects.all(), source='therapist')
+
+    class Meta:
+        model = Match
+        fields = [
+            'id',
+            'patient_id',
+            'therapist_id',
+            'patient_email',
+            'therapist_email',
+            'match_score',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'patient_email', 'therapist_email']

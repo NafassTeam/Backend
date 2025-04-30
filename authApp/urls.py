@@ -2,13 +2,14 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .views import UserViewSet, PatientCreateView, TherapistCreateView, PatientViewSet, TherapistViewSet, LoginView, verify_email
+from .views import UserViewSet, PatientCreateView, TherapistCreateView, PatientViewSet, TherapistViewSet, LoginView, verify_email, MatchViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 router = DefaultRouter()
 router.register(r'patients', PatientViewSet)
 router.register(r'therapists', TherapistViewSet)
 router.register(r'users', UserViewSet)
+router.register(r'matches', MatchViewSet)
 
 class CustomAPIRootView(APIView):
     def get(self, request, *args, **kwargs):
@@ -16,6 +17,7 @@ class CustomAPIRootView(APIView):
             'patients': request.build_absolute_uri('patients/'),
             'therapists': request.build_absolute_uri('therapists/'),
             'users': request.build_absolute_uri('users/'),
+            'matches': request.build_absolute_uri('matches/'), # MatchViewSet
             'register_patient': request.build_absolute_uri('register/patient/'),
             'register_therapist': request.build_absolute_uri('register/therapist/'),
             'login': request.build_absolute_uri('login/'),
