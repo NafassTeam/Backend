@@ -9,8 +9,9 @@ from .serializers import (
     TherapistSerializer,
     LoginSerializer,
     MatchSerializer,
+    SessionSerializer
 )
-from .models import User, Patient, Therapist, Match
+from .models import User, Patient, Therapist, Match, Session
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import CreateAPIView
 from rest_framework.views import APIView
@@ -19,6 +20,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from .permissions import IsAdmin, IsAdminOrSelfPatient, IsAdminOrSelfTherapist
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.conf import settings
 from django.shortcuts import get_object_or_404
@@ -247,28 +249,32 @@ class MatchViewSet(ModelViewSet):
             match.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-# class UserProfileView(generics.RetrieveUpdateAPIView):
-#     serializer_class = UserSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def get_object(self):
-#         return self.request.user
-
-#     def retrieve(self, request, *args, **kwargs):
-#         instance = self.get_object()
-#         serializer = self.get_serializer(instance)
-#         return Response(serializer.data)
-
-#     def update(self, request, *args, **kwargs):
-#         partial = kwargs.pop('partial', False)
-#         instance = self.get_object()
-#         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-#         if serializer.is_valid():
-#             self.perform_update(serializer)
-#             return Response(
-#                 {"message": "Profile updated successfully", "data": serializer.data},
-#                 status=status.HTTP_200_OK
-#             )
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+class SessionViewSet(ModelViewSet):
+    queryset = Session.objects.all()
+    serializer_class = SessionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        
+        if user.is_staff or user.is_superuser:
+            return Session.objects.all()
+        
+        if hasattr(user, 'therapist'):
+            return Session.objects.filter(therapist=user.therapist)
+        elif hasattr(user, 'patient'):
+            return Session.objects.filter(patient=user.patient)
+        return Session.objects.none()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+
+        if user.is_superuser:
+            serializer.save()
+        elif hasattr(user, 'patient'):
+            serializer.save(patient=user.patient)
+        elif hasattr(user, 'therapist'):
+            serializer.save(therapist=user.therapist)
+        else:
+            raise PermissionDenied("Only superadmins, patients, or therapists can create sessions.")

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from .models import Therapist, Patient, Match
+from .models import Therapist, Patient, Match, Session
 
 User = get_user_model()
 
@@ -20,3 +20,8 @@ class CustomUserAdmin(admin.ModelAdmin):
 @admin.register(Match)
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Match._meta.fields]
+
+@admin.register(Session)
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in Session._meta.fields]
+    list_filter = ['therapist', 'patient']

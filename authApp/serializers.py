@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User, Therapist, Patient, Match
+from .models import User, Therapist, Patient, Match, Session
 import re
 
 
@@ -204,3 +204,10 @@ class MatchSerializer(serializers.ModelSerializer):
             'created_at',
         ]
         read_only_fields = ['id', 'created_at', 'patient_email', 'therapist_email']
+
+
+class SessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Session
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at']

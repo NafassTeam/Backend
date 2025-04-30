@@ -88,3 +88,13 @@ class Match(models.Model):
 
     def __str__(self):
         return f"{self.patient.user.username} ↔ {self.therapist.user.username} ({self.match_score})"
+
+class Session(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='sessions')
+    therapist = models.ForeignKey(Therapist, on_delete=models.CASCADE, related_name='sessions')
+    scheduled_time = models.DateTimeField()
+    duration_minutes = models.IntegerField(default=60)
+    session_type = models.CharField(max_length=20, choices=[('video', 'Video'), ('chat', 'Chat'), ('phone', 'Phone')])
+    status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('confirmed', 'Confirmed'), ('completed', 'Completed'), ('cancelled', 'Cancelled')], default='pending')
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)    
