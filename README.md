@@ -22,3 +22,10 @@
 1- Add a Match model and all its CRUDs (works perfectly)
 
 2- idk what also but i think it's not important
+
+***2025/04/30's 14:30PM push:*** -- Moncef
+
+/auth/sessions to perform post, get methods
+/auth/sessions/<id> to perform delete, patch methods
+
+1- Add a Session model with all its CRUDs
