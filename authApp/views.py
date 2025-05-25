@@ -9,7 +9,7 @@ from .serializers import (
     TherapistSerializer,
     LoginSerializer,
     MatchSerializer,
-    SessionSerializer
+    SessionSerializer,
 )
 from .models import User, Patient, Therapist, Match, Session
 from rest_framework.viewsets import ModelViewSet
@@ -23,7 +23,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.conf import settings
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponse
 
 
@@ -193,7 +193,9 @@ def verify_email(request, token):
     user = get_object_or_404(User, email_verification_token=token)
     user.is_verified = True
     user.save()
-    return HttpResponse("Email successfully verified!")
+    return redirect(
+        "localhost:3002/Frontend/Email-verified"
+    )
 
 
 # view to create, update, delete and get matches
@@ -206,9 +208,9 @@ class MatchViewSet(ModelViewSet):
         user = self.request.user
         if user.is_superuser or user.is_staff:
             return Match.objects.all()
-        if hasattr(user, 'therapist'):
+        if hasattr(user, "therapist"):
             return Match.objects.filter(therapist=user.therapist)
-        elif hasattr(user, 'patient'):
+        elif hasattr(user, "patient"):
             return Match.objects.filter(patient=user.patient)
         return Match.objects.none()
 
@@ -249,7 +251,7 @@ class MatchViewSet(ModelViewSet):
             match.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    
+
 class SessionViewSet(ModelViewSet):
     queryset = Session.objects.all()
     serializer_class = SessionSerializer
@@ -257,13 +259,13 @@ class SessionViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        
+
         if user.is_staff or user.is_superuser:
             return Session.objects.all()
-        
-        if hasattr(user, 'therapist'):
+
+        if hasattr(user, "therapist"):
             return Session.objects.filter(therapist=user.therapist)
-        elif hasattr(user, 'patient'):
+        elif hasattr(user, "patient"):
             return Session.objects.filter(patient=user.patient)
         return Session.objects.none()
 
@@ -272,9 +274,11 @@ class SessionViewSet(ModelViewSet):
 
         if user.is_superuser:
             serializer.save()
-        elif hasattr(user, 'patient'):
+        elif hasattr(user, "patient"):
             serializer.save(patient=user.patient)
-        elif hasattr(user, 'therapist'):
+        elif hasattr(user, "therapist"):
             serializer.save(therapist=user.therapist)
         else:
-            raise PermissionDenied("Only superadmins, patients, or therapists can create sessions.")
+            raise PermissionDenied(
+                "Only superadmins, patients, or therapists can create sessions."
+            )
