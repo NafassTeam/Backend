@@ -192,9 +192,9 @@ def send_verification_email(user):
 def verify_email(request, token):
     user = get_object_or_404(User, email_verification_token=token)
     user.is_verified = True
-    user.save()
+    user.save()x
     return redirect(
-        "localhost:3002/Frontend/Email-verified"
+        "http://localhost:3002/Frontend/Email-verified"
     )
 
 
