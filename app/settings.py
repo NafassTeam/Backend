@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'drf_yasg',
     'authApp',
-    'corsheaders'
+    'video_sessions',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -171,7 +172,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_FROM_EMAIL = 'selloummoncif.5@gmail.com'
-FRONTEND_URL = 'https://nafassbackend-production.up.railway.app/'  # i use this url temporaryily, i will change it later to the real one
+FRONTEND_URL = 'http://localhost:3002'  # i use this url temporaryily, i will change it later to the real one
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -194,3 +195,7 @@ SIMPLE_JWT = {
 
 # Allow local frontend redirects for development
 REDIRECT_ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# ZEGOCLOUD Settings
+ZEGO_APP_ID = '1951230565'  # Replace with your ZEGOCLOUD App ID
+ZEGO_SERVER_SECRET = '6c0539a580ee434afc55d2102b8baa36'  # Replace with your ZEGOCLOUD Server Secret
+

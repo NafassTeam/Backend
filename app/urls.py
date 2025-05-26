@@ -48,4 +48,5 @@ urlpatterns = [
     path('auth/',  include('authApp.urls')),  # Include the auth app URLs
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('verify-email/<uuid:token>/', verify_email, name='verify_email'),
+    path('api/video/', include('video_sessions.urls')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # Serve media files in development
