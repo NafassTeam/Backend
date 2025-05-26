@@ -191,3 +191,6 @@ SIMPLE_JWT = {
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# Allow local frontend redirects for development
+REDIRECT_ALLOWED_HOSTS = ['localhost', '127.0.0.1']
