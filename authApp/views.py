@@ -9,8 +9,10 @@ from .serializers import (
     TherapistSerializer,
     LoginSerializer,
     MatchSerializer,
-    SessionSerializer
-)
+    SessionSerializer,
+) 
+from video_sessions.models import VideoSession
+from video_sessions.serializers import VideoSessionSerializer
 from .models import User, Patient, Therapist, Match, Session
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import CreateAPIView
@@ -25,6 +27,9 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
+import uuid
+from video_sessions.models import VideoSession
+from video_sessions.serializers import VideoSessionSerializer
 
 
 class UserViewSet(ModelViewSet):
@@ -101,6 +106,53 @@ class TherapistViewSet(ModelViewSet):
         elif request.method == "DELETE":
             therapist.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+        
+    @action(detail=False, methods=['get'], url_path='me/my-patients')
+    def my_patients(self, request):
+        try:
+            therapist = Therapist.objects.get(user=request.user)
+            
+            # Get all patients associated with this therapist through matches
+            matches = Match.objects.filter(therapist=therapist)
+            patients = [match.patient for match in matches]
+            
+            # Serialize the data
+            patient_data = PatientSerializer(patients, many=True).data
+            
+            return Response(patient_data)
+            
+        except Therapist.DoesNotExist:
+            return Response(
+                {"detail": "Therapist not found."}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    @action(detail=False, methods=['post'], url_path='me/video-session/create')
+    def create_video_session(self, request):
+        """
+        Redirect to the video sessions app create_room endpoint
+        """
+        from video_sessions.views import VideoSessionViewSet
+        video_session_viewset = VideoSessionViewSet()
+        video_session_viewset.request = request
+        return video_session_viewset.create_room(request)
+
+    @action(detail=False, methods=['get'], url_path='me/video-session/join/(?P<room_id>[^/.]+)')
+    def join_video_session(self, request, room_id):
+        """
+        Redirect to the video sessions app get_token endpoint
+        """
+        from video_sessions.views import VideoSessionViewSet
+        video_session_viewset = VideoSessionViewSet()
+        video_session_viewset.request = request
+        request.query_params = request.query_params.copy()
+        request.query_params['room_id'] = room_id
+        return video_session_viewset.get_token(request)
 
 
 class PatientCreateView(generics.CreateAPIView):

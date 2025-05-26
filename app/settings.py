@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'drf_yasg',
     'authApp',
+    'video_sessions',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -165,3 +167,9 @@ SIMPLE_JWT = {
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+# ZEGOCLOUD Settings
+ZEGO_APP_ID = '1951230565'  # Replace with your ZEGOCLOUD App ID
+ZEGO_SERVER_SECRET = '6c0539a580ee434afc55d2102b8baa36'  # Replace with your ZEGOCLOUD Server Secret
+
+# Frontend URL for video room
+FRONTEND_URL = 'http://localhost:3000'

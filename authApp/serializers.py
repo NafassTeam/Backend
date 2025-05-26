@@ -211,3 +211,6 @@ class SessionSerializer(serializers.ModelSerializer):
         model = Session
         fields = '__all__'
         read_only_fields = ['id', 'created_at']
+        
+        
+        
