@@ -59,6 +59,12 @@ class TherapistCreateSerializer(serializers.ModelSerializer):
     autorization_number = serializers.CharField(required=False)
     documents = serializers.FileField(required=False)
     profile_picture = serializers.ImageField(required=False)
+    features = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        allow_null=True,
+        default=list,
+    )
 
     class Meta:
         model = User
@@ -83,9 +89,11 @@ class TherapistCreateSerializer(serializers.ModelSerializer):
             "autorization_number",
             "documents",
             "profile_picture",
+            "features",
         ]
 
     def create(self, validated_data):
+        features = validated_data.pop("features", [])
         therapist_data = {
             "address": validated_data.pop("address", None),
             "province": validated_data.pop("province", None),
@@ -98,6 +106,7 @@ class TherapistCreateSerializer(serializers.ModelSerializer):
             "specialization": validated_data.pop("specialization", None),
             "autorization_number": validated_data.pop("autorization_number", None),
             "documents": validated_data.pop("documents", None),
+            "features": features,
         }
         user = User.objects.create_user(
             username=validated_data["username"],
@@ -181,6 +190,11 @@ class TherapistSerializer(serializers.ModelSerializer):
     role = serializers.CharField(source="user.role")
     first_name = serializers.CharField(source="user.first_name")
     last_name = serializers.CharField(source="user.last_name")
+    features = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
         model = Therapist
@@ -200,24 +214,22 @@ class TherapistSerializer(serializers.ModelSerializer):
             "languages_spoken",
             "specialization",
             "autorization_number",
+            "features",
         ]
         read_only_fields = ["id"]
 
     def update(self, instance, validated_data):
-        # Separate out nested user data
         user_data = validated_data.pop("user", {})
-
-        # Update Patient model fields dynamically
+        features = validated_data.pop("features", None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+        if features is not None:
+            instance.features = features
         instance.save()
-
-        # Update related User model fields dynamically
         user = instance.user
         for attr, value in user_data.items():
             setattr(user, attr, value)
         user.save()
-
         return instance
 
 

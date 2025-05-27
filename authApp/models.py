@@ -109,6 +109,12 @@ class Therapist(models.Model):
     cost = models.DecimalField(
         max_digits=14, decimal_places=2, default=0
     )  # Cost of therapy sessions
+    features = models.JSONField(
+        blank=True,
+        null=True,
+        default=list,
+        help_text="Stores an array of integers for therapist features.",
+    )
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} (Therapist)"
